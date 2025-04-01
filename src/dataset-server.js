@@ -23,14 +23,17 @@ router.get('/api/medical/search', (req, res) => {
         return res.status(400).json({ error: 'Query parameter "q" is required' });
     }
 
-    const results = trainData.filter(item =>
+    const trainresults = trainData.filter(item =>
+        item.input.toLowerCase().includes(query.toLowerCase())
+    ).slice(0, limit);
+    const testresults = testData.filter(item =>
         item.input.toLowerCase().includes(query.toLowerCase())
     ).slice(0, limit);
 
-    res.json({ results });
+    res.json({ trainresults, testresults });
 });
 
-router.get('/api/medical/item/:index', (req, res) => {
+router.get('/api/trainmedical/item/:index', (req, res) => {
     const index = parseInt(req.params.index);
 
     if (isNaN(index) || index < 0 || index >= trainData.length) {
@@ -39,15 +42,37 @@ router.get('/api/medical/item/:index', (req, res) => {
 
     res.json({ item: trainData[index] });
 });
+router.get('/api/testmedical/item/:index', (req, res) => {
+    const index = parseInt(req.params.index);
 
-router.get('/api/medical/list', (req, res) => {
+    if (isNaN(index) || index < 0 || index >= testData.length) {
+        return res.status(400).json({ error: 'Invalid index' });
+    }
+
+    res.json({ item: testData[index] });
+});
+
+router.get('/api/trainmedical/list', (req, res) => {
     const offset = parseInt(req.query.offset) || 0;
-    const limit = parseInt(req.query.limit) || 100;
+    const limit = parseInt(req.query.limit) || 31;
 
     const items = trainData.slice(offset, offset + limit);
 
     res.json({
         total: trainData.length,
+        offset,
+        limit,
+        items
+    });
+});
+router.get('/api/testmedical/list', (req, res) => {
+    const offset = parseInt(req.query.offset) || 0;
+    const limit = parseInt(req.query.limit) || 21;
+
+    const items = testData.slice(offset, offset + limit);
+
+    res.json({
+        total: testData.length,
         offset,
         limit,
         items
